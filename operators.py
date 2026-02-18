@@ -13,6 +13,13 @@ from bpy.types import Operator
 from mathutils import Euler, Quaternion
 
 
+def _tag_redraw_all(wm: bpy.types.WindowManager) -> None:
+    """Force all UI areas across all windows to redraw (e.g. sync Outliner ↔ N-panel)."""
+    for window in wm.windows:
+        for area in window.screen.areas:
+            area.tag_redraw()
+
+
 class CTT_OT_copy_transform(Operator):
     bl_idname = "ctt.copy_transform"
     bl_label = "Copy Transform"
@@ -42,6 +49,7 @@ class CTT_OT_copy_transform(Operator):
 
         wm.ctt_clip_scale = obj.scale
         wm.ctt_has_data = True
+        _tag_redraw_all(wm)
 
         self.report({'INFO'}, f"Copied transform from '{obj.name}'")
         return {'FINISHED'}
@@ -83,6 +91,7 @@ class CTT_OT_paste_transform(Operator):
 
             count += 1
 
+        _tag_redraw_all(wm)
         self.report({'INFO'}, f"Pasted transform to {count} object(s)")
         return {'FINISHED'}
 

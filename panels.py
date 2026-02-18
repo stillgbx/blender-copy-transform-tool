@@ -1,7 +1,9 @@
 """
 Copy Transform Tool — UI Panel
 
-Location: View3D > Sidebar (N) > Copy Transform
+Locations:
+  - View3D > Sidebar (N) > Copy Transform  (CTT_PT_main)
+  - Outliner right-click on object          (_draw_outliner_menu appended to OUTLINER_MT_object)
 """
 
 import math
@@ -73,11 +75,26 @@ class CTT_PT_main(Panel):
 classes = (CTT_PT_main,)
 
 
+# ── Outliner context menu ────────────────────────────────────────────────────
+
+def _draw_outliner_menu(self, context: bpy.types.Context) -> None:
+    """Appended to OUTLINER_MT_object: adds Copy/Paste entries in the right-click menu."""
+    wm = context.window_manager
+    layout = self.layout
+    layout.separator()
+    layout.operator("ctt.copy_transform", icon='COPYDOWN')
+    row = layout.row()
+    row.enabled = wm.ctt_has_data
+    row.operator("ctt.paste_transform", icon='PASTEDOWN')
+
+
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
+    bpy.types.OUTLINER_MT_object.append(_draw_outliner_menu)
 
 
 def unregister():
+    bpy.types.OUTLINER_MT_object.remove(_draw_outliner_menu)
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
